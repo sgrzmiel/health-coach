@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>health-coach</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header class="top-bar">
+  <div class="brand">
+    <div class="brand-mark">HC</div>
+    <div>
+      <div class="brand-name">health-coach</div>
+      <div class="brand-sub">Garmin + Withings + Fitatu &middot; AI coaching</div>
+    </div>
+  </div>
+  <div class="auth-area">
+    <span id="auth-status" class="muted"></span>
+    <button id="login-btn" type="button" class="secondary">Zaloguj</button>
+    <button id="logout-btn" type="button" class="secondary hidden">Wyloguj</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="dashboard">Dashboard</button>
+  <button class="tab" data-tab="weight">Waga</button>
+  <button class="tab" data-tab="activities">Aktywno&#347;ci</button>
+  <button class="tab" data-tab="gym">Si&#322;ka</button>
+  <button class="tab" data-tab="nutrition">&#379;ywienie</button>
+  <button class="tab" data-tab="coach">Coach</button>
+  <button class="tab" data-tab="equipment">Sprz&#281;t</button>
+  <button class="tab" data-tab="settings">Ustawienia</button>
+</nav>
+
+<main id="content">
+
+  <!-- DASHBOARD -->
+  <section id="tab-dashboard" class="tab-panel">
+    <div class="dash-sync-row">
+      <span id="sync-all-status" class="muted"></span>
+      <button id="sync-all-btn" class="green">&#8635; Synchronizuj wszystko</button>
+    </div>
+    <div class="row">
+      <div class="card">
+        <h3>Dzi&#347; &mdash; <span id="dash-date" class="muted"></span></h3>
+        <div id="dash-today"><div class="muted">&#8213;</div></div>
+      </div>
+      <div class="card">
+        <h3>&#379;ywienie dzi&#347;</h3>
+        <div id="dash-nutrition"><div class="muted">Brak danych Fitatu.</div></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="card">
+        <h3>Waga (Withings)</h3>
+        <div id="dash-weight"><div class="muted">Brak danych.</div></div>
+      </div>
+      <div class="card">
+        <h3>Ostatnie 7 dni &mdash; aktywno&#347;ci</h3>
+        <div id="dash-recent-act"><div class="muted">&#8213;</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Ostatnie 14 dni &mdash; metryki dzienne</h3>
+      <div id="dash-daily-table"><div class="muted">&#8213;</div></div>
+    </div>
+  </section>
+
+  <!-- WEIGHT -->
+  <section id="tab-weight" class="tab-panel hidden">
+    <div id="weight-stats-row" class="row" style="margin-bottom:0"></div>
+    <div class="card" style="margin-top:14px">
+      <h3>Waga (kg)</h3>
+      <div id="weight-chart-weight"><div class="muted loading-pulse">Ładuję...</div></div>
+    </div>
+    <div class="row">
+      <div class="card">
+        <h3>Tłuszcz (%)</h3>
+        <div id="weight-chart-fat"><div class="muted loading-pulse">Ładuję...</div></div>
+      </div>
+      <div class="card">
+        <h3>Woda (%)</h3>
+        <div id="weight-chart-water"><div class="muted loading-pulse">Ładuję...</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row spaced">
+        <h3>Historia pomiarów</h3>
+        <select id="weight-range" style="font-size:12px">
+          <option value="30">30 dni</option>
+          <option value="60">60 dni</option>
+          <option value="90" selected>90 dni</option>
+        </select>
+      </div>
+      <div id="weight-table" style="margin-top:10px"><div class="muted loading-pulse">Ładuję...</div></div>
+    </div>
+  </section>
+
+  <!-- ACTIVITIES -->
+  <section id="tab-activities" class="tab-panel hidden">
+    <div class="card">
+      <div class="row spaced">
+        <h3>Aktywno&#347;ci z Garmina</h3>
+        <button id="reload-activities" class="secondary">Od&#347;wie&#380;</button>
+      </div>
+      <div id="all-activities"><div class="muted">&#8213;</div></div>
+    </div>
+  </section>
+
+  <!-- GYM -->
+  <section id="tab-gym" class="tab-panel hidden">
+    <div class="card">
+      <div class="row spaced">
+        <h3>Log si&#322;owni</h3>
+        <button id="gym-new-btn">+ Sesja</button>
+      </div>
+      <div id="gym-editor" class="hidden" style="margin-top:12px">
+        <div class="form-row">
+          <input type="date" id="gym-date" />
+          <input type="number" id="gym-duration" placeholder="Czas [min]" style="width:110px" />
+          <input type="number" id="gym-rpe" placeholder="RPE (1-10)" min="1" max="10" style="width:110px" />
+          <input id="gym-notes" placeholder="Notatka" class="grow" />
+        </div>
+        <div id="gym-sets-editor" style="margin-top:8px"></div>
+        <div class="form-row" style="margin-top:10px">
+          <button id="gym-add-exercise" class="secondary">+ &#262;wiczenie</button>
+          <button id="gym-save">Zapisz sesj&#281;</button>
+          <button id="gym-cancel" class="secondary">Anuluj</button>
+        </div>
+      </div>
+      <div id="gym-sessions-list" style="margin-top:14px"><div class="muted">&#8213;</div></div>
+    </div>
+  </section>
+
+  <!-- NUTRITION -->
+  <section id="tab-nutrition" class="tab-panel hidden">
+    <div class="card">
+      <div class="row spaced">
+        <h3>Fitatu &mdash; dziennik &#380;ywienia</h3>
+        <div style="display:flex;gap:8px">
+          <button id="fitatu-sync-btn" class="secondary">Synchronizuj (30 dni)</button>
+          <span id="fitatu-sync-status" class="muted"></span>
+        </div>
+      </div>
+      <div id="nutrition-table"><div class="muted">&#8213;</div></div>
+    </div>
+  </section>
+
+  <!-- COACH -->
+  <section id="tab-coach" class="tab-panel hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div class="coach-tabs" style="margin-bottom:0">
+      <button class="coach-tab active" data-coach="plan">Plan tygodniowy</button>
+      <button class="coach-tab" data-coach="gym-session">Sesja si&#322;owa</button>
+      <button class="coach-tab" data-coach="eval">Ocena sesji</button>
+      <button class="coach-tab" data-coach="recovery">Regeneracja</button>
+      <button class="coach-tab" data-coach="nutrition-analysis">&#379;ywienie + Trening</button>
+      </div>
+      <span id="coach-provider-badge" class="muted" style="font-size:12px"></span>
+    </div>
+
+    <!-- Plan -->
+    <div id="coach-plan-panel">
+      <div class="card">
+        <div class="row spaced">
+          <h3>Plan treningowy 7 dni</h3>
+          <button id="coach-plan-btn" class="green">Generuj plan</button>
+        </div>
+        <div id="coach-plan-output" class="muted" style="margin-top:10px">Kliknij "Generuj plan" aby stworzy&#263; plan na nast&#281;pne 7 dni.</div>
+      </div>
+      <div class="card">
+        <h3>Historia plan&#243;w</h3>
+        <div id="coach-plan-history" class="muted">&#8213;</div>
+      </div>
+    </div>
+
+    <!-- Gym session -->
+    <div id="coach-gym-session-panel" class="hidden">
+      <div class="card">
+        <div class="row spaced">
+          <h3>Sesja si&#322;owa na dzi&#347;</h3>
+          <button id="coach-gym-session-btn" class="green">Generuj sesj&#281;</button>
+        </div>
+        <div id="coach-gym-session-output" class="muted" style="margin-top:10px">Kliknij aby wygenerowa&#263; plan sesji si&#322;owej na dzi&#347; &mdash; dobrane do aktualnej regeneracji i progresji.</div>
+      </div>
+    </div>
+
+    <!-- Eval -->
+    <div id="coach-eval-panel" class="hidden">
+      <div class="card">
+        <h3>Oceń sesję</h3>
+        <div class="form-row">
+          <select id="eval-kind">
+            <option value="garmin">Aktywno&#347;&#263; Garmin</option>
+            <option value="gym">Sesja si&#322;owa</option>
+          </select>
+          <select id="eval-id"><option>&#8213; wybierz &#8213;</option></select>
+          <button id="coach-eval-btn" class="green">Oceń</button>
+        </div>
+        <div id="coach-eval-output" class="muted" style="margin-top:14px">Wybierz sesj&#281; i kliknij "Oce&#324;".</div>
+      </div>
+    </div>
+
+    <!-- Recovery -->
+    <div id="coach-recovery-panel" class="hidden">
+      <div class="card">
+        <div class="row spaced">
+          <h3>Ocena regeneracji (stan na dzi&#347;)</h3>
+          <button id="coach-recovery-btn" class="green">Oceń regeneracj&#281;</button>
+        </div>
+        <div id="coach-recovery-output" class="muted" style="margin-top:10px">Kliknij aby oceni&#263; aktualny stan regeneracji.</div>
+      </div>
+    </div>
+
+    <!-- Nutrition analysis -->
+    <div id="coach-nutrition-panel" class="hidden">
+      <div class="card">
+        <div class="row spaced">
+          <h3>Analiza &#380;ywienie + Trening (30 dni)</h3>
+          <button id="coach-nutrition-btn" class="green">Analizuj</button>
+        </div>
+        <div id="coach-nutrition-output" class="muted" style="margin-top:10px">Kliknij aby przeanalizowa&#263; dane z ostatnich 30 dni.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EQUIPMENT -->
+  <section id="tab-equipment" class="tab-panel hidden">
+    <div class="card">
+      <div class="row spaced">
+        <h3>Sprz&#281;t</h3>
+        <button id="eq-add-btn" class="secondary">+ Dodaj</button>
+      </div>
+      <div id="eq-list" style="margin-top:10px"><div class="muted">&#8213;</div></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="tab-settings" class="tab-panel hidden">
+
+    <div class="card">
+      <h3>Po&#322;&#261;czenia</h3>
+      <div class="row">
+        <div class="card" style="min-width:160px">
+          <div style="font-weight:600;margin-bottom:6px">Garmin</div>
+          <div id="garmin-status-label" class="muted">&#8213;</div>
+          <div class="form-row" style="margin-top:10px">
+            <button id="garmin-login-btn" class="secondary">Zaloguj</button>
+            <button id="garmin-sync-btn" class="secondary">Sync</button>
+          </div>
+          <div id="garmin-mfa-row" class="hidden form-row" style="margin-top:8px">
+            <input id="garmin-mfa-input" placeholder="Kod MFA" style="width:100px" />
+            <button id="garmin-mfa-btn">Potwierd&#378;</button>
+          </div>
+        </div>
+        <div class="card" style="min-width:160px">
+          <div style="font-weight:600;margin-bottom:6px">Withings</div>
+          <div id="withings-status-label" class="muted">&#8213;</div>
+          <div class="form-row" style="margin-top:10px">
+            <button id="withings-connect-btn" class="secondary">Po&#322;&#261;cz</button>
+            <button id="withings-sync-btn" class="secondary">Sync</button>
+            <button id="withings-disconnect-btn" class="danger hidden">Od&#322;&#261;cz</button>
+          </div>
+        </div>
+        <div class="card" style="min-width:160px">
+          <div style="font-weight:600;margin-bottom:6px">Fitatu</div>
+          <div id="fitatu-status-label" class="muted">&#8213;</div>
+          <div class="form-row" style="margin-top:10px">
+            <button id="fitatu-login-btn" class="secondary">Zaloguj</button>
+            <button id="fitatu-sync-settings-btn" class="secondary">Sync</button>
+            <button id="fitatu-disconnect-btn" class="danger hidden">Od&#322;&#261;cz</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Klucze i has&#322;a (.env)</h3>
+      <div class="kv-form" id="env-form">
+        <label>ANTHROPIC_API_KEY</label><input type="password" data-env="ANTHROPIC_API_KEY" placeholder="sk-ant-..." />
+        <label>GARMIN_EMAIL</label><input type="text" data-env="GARMIN_EMAIL" />
+        <label>GARMIN_PASSWORD</label><input type="password" data-env="GARMIN_PASSWORD" />
+        <label>WITHINGS_CLIENT_ID</label><input type="text" data-env="WITHINGS_CLIENT_ID" />
+        <label>WITHINGS_CLIENT_SECRET</label><input type="password" data-env="WITHINGS_CLIENT_SECRET" />
+        <label>FITATU_EMAIL</label><input type="text" data-env="FITATU_EMAIL" />
+        <label>FITATU_PASSWORD</label><input type="password" data-env="FITATU_PASSWORD" />
+        <label>OLLAMA_BASE_URL</label><input type="text" data-env="OLLAMA_BASE_URL" placeholder="http://localhost:11434" />
+        <label>APP_PASSWORD</label><input type="password" data-env="APP_PASSWORD" placeholder="opcjonalne" />
+      </div>
+      <div class="form-row" style="margin-top:12px">
+        <button id="env-save-btn">Zapisz klucze</button>
+        <span id="env-save-status" class="muted"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Konfiguracja cel&#243;w</h3>
+      <div class="kv-form" id="config-form">
+        <label>Cel og&#243;lny</label><input type="text" data-cfg="goal_summary" />
+        <label>Waga aktualna (kg)</label><input type="number" data-cfg="current_weight_kg" />
+        <label>Waga docelowa (kg)</label><input type="number" data-cfg="goal_weight_kg" />
+        <label>Cele tygodniowe</label><input type="text" data-cfg="weekly_targets" />
+        <label>Cel kaloryczny (kcal)</label><input type="number" data-cfg="calorie_target" />
+        <label>Bia&#322;ko docelowe (g)</label><input type="number" data-cfg="protein_target_g" />
+        <label>Dostawca AI</label>
+        <select data-cfg="llm_provider">
+          <option value="auto">auto (Anthropic jeśli klucz, inaczej Ollama)</option>
+          <option value="ollama">Ollama (lokalny)</option>
+          <option value="anthropic">Anthropic (Claude API)</option>
+        </select>
+        <label>Model Claude (Anthropic)</label>
+        <select data-cfg="claude_model">
+          <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+          <option value="claude-opus-4-8">claude-opus-4-8</option>
+          <option value="claude-haiku-4-5-20251001">claude-haiku-4-5-20251001</option>
+        </select>
+        <label>Model Ollama (lokalny)</label>
+        <select data-cfg="ollama_model">
+          <option value="qwen2.5:14b">qwen2.5:14b (obecny)</option>
+          <option value="mistral-small:22b">mistral-small:22b (polecany ~14 GB)</option>
+          <option value="phi4:14b">phi4:14b (~9 GB)</option>
+        </select>
+        <label>Okno sync (dni)</label><input type="number" data-cfg="sync_window_days" />
+      </div>
+      <div class="form-row" style="margin-top:12px">
+        <button id="config-save-btn">Zapisz konfiguracj&#281;</button>
+        <span id="config-save-status" class="muted"></span>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- Login modal -->
+<div id="login-modal" class="modal hidden">
+  <div class="modal-card">
+    <h3>Logowanie</h3>
+    <input type="password" id="login-password" placeholder="Has&#322;o" style="width:100%" />
+    <div class="form-row" style="margin-top:12px">
+      <button id="login-submit">Zaloguj</button>
+      <button id="login-cancel" class="secondary">Anuluj</button>
+    </div>
+    <div id="login-error" class="status err hidden" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

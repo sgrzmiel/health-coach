@@ -1,0 +1,8 @@
+fastapi>=0.110
+uvicorn[standard]>=0.27
+httpx>=0.27
+anthropic>=0.40
+pydantic>=2.5
+python-dotenv>=1.0
+garminconnect>=0.2.20
+garth>=0.4.45

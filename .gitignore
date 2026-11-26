@@ -1,0 +1,33 @@
+# --- Secrets / credentials ---
+.env
+*.env
+!.env.example
+
+# --- Personal data: local database ---
+health.db
+health.db-shm
+health.db-wal
+app/health.db
+data/
+
+# --- Personal profile (keep profile.example.md as template) ---
+prompts/profile.md
+
+# --- Garmin OAuth tokens (stored in ~/.garminconnect, but just in case) ---
+.garminconnect/
+garmin_tokens.json
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# --- OS / editor ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
